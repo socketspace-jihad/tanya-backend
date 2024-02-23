@@ -7,7 +7,10 @@ import (
 	"os"
 
 	"github.com/socketspace-jihad/tanya-backend/models"
+	"github.com/socketspace-jihad/tanya-backend/models/presensi_types"
+	"github.com/socketspace-jihad/tanya-backend/models/school_class_events"
 	"github.com/socketspace-jihad/tanya-backend/models/student_presensi"
+	"github.com/socketspace-jihad/tanya-backend/models/subjects"
 )
 
 type StudentPresensiMySQL struct {
@@ -46,6 +49,57 @@ func (s *StudentPresensiMySQL) GetByID(id uint) (*student_presensi.StudentPresen
 	return nil, nil
 }
 
+func (s *StudentPresensiMySQL) GetByStudentProfilesID(id uint) ([]student_presensi.StudentPresensiData, error) {
+	rows, err := s.db.Query(`
+		SELECT
+			sp.id,
+			sp.created_at,
+			ce.name,
+			s.name,
+			sp.lattitude,
+			sp.longitude,
+			sp.presensi_types_id,
+			pt.name,
+			pt.deskripsi
+		FROM
+			student_presensi AS sp
+		LEFT JOIN presensi_types AS pt
+			ON pt.id = sp.presensi_types_id
+		LEFT JOIN class_events AS ce
+			ON ce.id = sp.events_id AND sp.event_types_id = 3
+		LEFT JOIN subjects AS s
+			ON s.id = ce.subjects_id
+		WHERE sp.student_profiles_id = ?
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	var presensis []student_presensi.StudentPresensiData
+	for rows.Next() {
+		presensi := student_presensi.StudentPresensiData{
+			PresensitypesData: &presensi_types.PresensitypesData{},
+			SchoolClassEventsData: &school_class_events.SchoolClassEventsData{
+				SubjectsData: &subjects.SubjectsData{},
+			},
+		}
+		if err := rows.Scan(
+			&presensi.ID,
+			&presensi.CreatedAt,
+			&presensi.SchoolClassEventsData.Name,
+			&presensi.SchoolClassEventsData.SubjectsData.Name,
+			&presensi.Lattitude,
+			&presensi.Longitude,
+			&presensi.PresensitypesData.ID,
+			&presensi.PresensitypesData.Name,
+			&presensi.PresensitypesData.Deskripsi,
+		); err != nil {
+			return nil, err
+		}
+		presensis = append(presensis, presensi)
+	}
+	return presensis, nil
+}
+
 func init() {
 	creds := &models.DBCreds{
 		Username: os.Getenv("DATABASE_USERNAME"),
@@ -54,7 +108,7 @@ func init() {
 		Database: os.Getenv("DATABASE_DATABASE"),
 		Port:     os.Getenv("DATABASE_PORT"),
 	}
-	connectionString := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", creds.Username, creds.Password, creds.Host, creds.Port, creds.Database)
+	connectionString := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", creds.Username, creds.Password, creds.Host, creds.Port, creds.Database)
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		panic(err)

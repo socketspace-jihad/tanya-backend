@@ -34,7 +34,6 @@ func (p *PresensiSiswa) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		log.Println(p.StudentPresensiData)
 		p.StudentPresensiData.StudentProfilesData = student
 		err = p.CreatePresensi()
 		if err != nil {
@@ -43,7 +42,19 @@ func (p *PresensiSiswa) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		p.q.Publish(p.StudentPresensiData, queue.TSekolahPresensiSiswa)
-
+	case http.MethodGet:
+		student, err := middlewares.GetStudentFromRequestContext(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		presensi, err := student_presensi.StudentPresensiDB.GetByStudentProfilesID(student.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(presensi)
 	}
 
 }

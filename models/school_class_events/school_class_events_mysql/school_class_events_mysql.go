@@ -3,7 +3,6 @@ package school_class_events_mysql
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -172,7 +171,7 @@ func (s *SchoolClassEventsMySQL) GetByStudentProfilesID(id uint) ([]school_class
 }
 
 func (s *SchoolClassEventsMySQL) GetNearestStudentEventsByTimeAndID(studentID uint, schoolClassID uint, t time.Time) (*school_class_events.SchoolClassEventsData, error) {
-	log.Println("LOCAL:", t)
+	t = t.Add(-7 * time.Hour)
 	rows, err := s.db.Query(`
 	SELECT
 		ce.id,
