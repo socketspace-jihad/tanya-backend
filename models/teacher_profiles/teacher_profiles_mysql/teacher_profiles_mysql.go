@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/teacher_profiles"
 )
@@ -14,11 +15,66 @@ type TeacherProfileMySQL struct {
 }
 
 func (t *TeacherProfileMySQL) Save(profile *teacher_profiles.TeacherProfilesData) error {
+	tx, err := t.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	res, err := tx.Exec(`
+		INSERT INTO
+			teacher_profiles
+		(
+			user_roles_id,
+			school_id,
+			nuptk,
+			name
+		) VALUES (
+			?,?,?,?
+		) 
+	`,
+		profile.UserRolesData.ID,
+		profile.SchoolData.ID,
+		profile.NUPTK,
+		profile.Name,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	profile.ID = uint(lastId)
+	tx.Commit()
 	return nil
 }
 
 func (t *TeacherProfileMySQL) GetByID(id uint) (*teacher_profiles.TeacherProfilesData, error) {
+	q, err := t.db.Query(`
+		SELECT 
+			id,
+			school_id,
+			name,
+			contact,
+			address
+		FROM teacher_profiles WHERE id=?`,
+		id,
+	)
+	if err != nil {
+		return nil, err
+	}
 	data := &teacher_profiles.TeacherProfilesData{}
+	for q.Next() {
+		q.Scan(
+			&data.ID,
+			&data.SchoolData.ID,
+			&data.Name,
+			&data.Contact,
+			&data.Address,
+		)
+	}
 	return data, nil
 }
 

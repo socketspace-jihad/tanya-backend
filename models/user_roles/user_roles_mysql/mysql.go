@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/user"
 	"github.com/socketspace-jihad/tanya-backend/models/user_roles"
@@ -19,7 +20,64 @@ type UserRolesMySQL struct {
 func (u *UserRolesMySQL) ValidateConnection() error {
 	return nil
 }
-func (u *UserRolesMySQL) Save(userRoles user_roles.UserRolesData) error {
+func (u *UserRolesMySQL) Save(userRoles *user_roles.UserRolesData) error {
+	tx, err := u.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	res, err := tx.Exec(`
+		INSERT INTO
+			user_roles
+		(
+			user_id,
+			roles_id
+		)
+		VALUES
+		(
+			?,?
+		)
+	`, userRoles.UserData.ID, userRoles.RolesData.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	userRoles.ID = uint(lastId)
+	tx.Commit()
+	return nil
+}
+func (u *UserRolesMySQL) Update(userRoles *user_roles.UserRolesData) error {
+	tx, err := u.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.Query(`
+		UPDATE
+			user_roles
+		SET
+			user_id = ?,
+			roles_id = ?,
+			current_teacher_profiles_id = ?,
+			current_student_profiles_id = ?
+		WHERE id = ?
+	`,
+		userRoles.UserData.ID,
+		userRoles.RolesData.ID,
+		userRoles.CurrentTeacherProfilesID,
+		userRoles.CurrentStudentProfilesID,
+		userRoles.ID,
+	); err != nil {
+		tx.Rollback()
+		log.Println(err)
+		return err
+	}
+	tx.Commit()
 	return nil
 }
 func (u *UserRolesMySQL) List() []user_roles.UserRolesData {
@@ -40,18 +98,29 @@ func (u *UserRolesMySQL) GetByRoleID(userId uint) (user_roles.UserRolesData, err
 func (u *UserRolesMySQL) GetByRoleAndUserID(roleId, userId uint) (user_roles.UserRolesData, error) {
 	var userRoleData user_roles.UserRolesData
 	tx, err := u.db.BeginTx(context.Background(), nil)
-	defer tx.Rollback()
 	if err != nil {
+		tx.Rollback()
 		return userRoleData, err
 	}
-	rows, err := tx.Query("SELECT id,user_id,roles_id FROM user_roles WHERE user_id=? AND roles_id=?", userId, roleId)
+	rows, err := tx.Query("SELECT id,user_id,roles_id,current_student_profiles_id,current_teacher_profiles_id FROM user_roles WHERE user_id=? AND roles_id=?", userId, roleId)
 	if err != nil {
+		tx.Rollback()
 		return userRoleData, err
 	}
 	for rows.Next() {
-		rows.Scan(&userRoleData.ID, &userRoleData.UserID, &userRoleData.RoleID)
+		if err := rows.Scan(
+			&userRoleData.ID,
+			&userRoleData.UserData.ID,
+			&userRoleData.RolesData.ID,
+			&userRoleData.CurrentStudentProfilesID,
+			&userRoleData.CurrentTeacherProfilesID,
+		); err != nil {
+			tx.Rollback()
+			return userRoleData, err
+		}
 	}
 	if err := tx.Commit(); err != nil {
+		tx.Rollback()
 		return userRoleData, err
 	}
 	return userRoleData, nil

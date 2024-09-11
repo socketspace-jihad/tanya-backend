@@ -10,7 +10,7 @@ import (
 )
 
 type SchoolClassEventsData struct {
-	ID                                    uint `json:"student_events"`
+	ID                                    uint `json:"id"`
 	*subjects.SubjectsData                `json:"subjects"`
 	Name                                  string    `json:"name"`
 	CreatedAt                             time.Time `json:"created_at"`

@@ -47,13 +47,18 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	userRole, err = user_roles.UserRolesDB.GetByRoleAndUserID(userRole.RoleID, data.ID)
+	userRole, err = user_roles.UserRolesDB.GetByRoleAndUserID(userRole.RolesData.ID, data.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	switch userRole.RoleID {
+	if userRole.ID == 0 {
+		http.Error(w, errors.New("user_roles not found within this user").Error(), http.StatusNotFound)
+		return
+	}
+
+	switch userRole.RolesData.ID {
 	// guru
 	case 1:
 		teacher, err := teacher_profiles.TeacherProfilesDB.GetByUserRoleID(userRole.ID)
@@ -62,6 +67,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		teacher.UserRolesData = userRole
+		teacher.UserRolesData.UserData = u
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, teacher)
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 		if err != nil {
@@ -79,6 +85,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		student.UserRolesData = userRole
+		student.UserRolesData.UserData = u
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, student)
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 		if err != nil {
@@ -96,6 +103,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		parent.UserRolesData = userRole
+		parent.UserRolesData.UserData = u
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, parent)
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 		if err != nil {

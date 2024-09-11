@@ -35,10 +35,7 @@ func (n *FCMNotification) Notify(msg *notification.Notification) error {
 			Title: msg.Title,
 			Body:  msg.Subtitle,
 		},
-		Data: map[string]string{
-			"title":    msg.Title,
-			"subtitle": msg.Subtitle,
-		},
+		Data:  msg.Data,
 		Topic: msg.Topic,
 	})
 	log.Println(res)

@@ -3,11 +3,11 @@ package auth
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/rs/cors"
 	"github.com/socketspace-jihad/tanya-backend/models/user"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,7 +25,6 @@ func (a *AuthLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.Unmarshal(body, &u); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -42,7 +41,6 @@ func (a *AuthLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Password = ""
-	log.Println(data)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &data)
 	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 	if err != nil {
@@ -54,5 +52,11 @@ func (a *AuthLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	http.DefaultServeMux.Handle("/v1/account/login", &AuthLogin{})
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+	http.DefaultServeMux.Handle("/v1/account/login", c.Handler(&AuthLogin{}))
 }

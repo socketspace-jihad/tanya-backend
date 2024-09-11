@@ -7,5 +7,6 @@ import (
 type ParentProfilesData struct {
 	ID                       uint   `json:"id"`
 	Name                     string `json:"name"`
+	NIK                      string `json:"nik"`
 	user_roles.UserRolesData `json:"user_roles"`
 }

@@ -24,6 +24,14 @@ func tokenParser(token string) (string, error) {
 	return parsed[1], nil
 }
 
+func GetUser(r *http.Request) (*user.UserData, error) {
+	user, ok := r.Context().Value(middlewares.ContextKey("user")).(user.UserData)
+	if !ok {
+		return nil, errors.New("jwt token not valid")
+	}
+	return &user, nil
+}
+
 func AuthMiddlewareHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")

@@ -2,8 +2,10 @@ package schedule_parent
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/socketspace-jihad/tanya-backend/middlewares"
 	"github.com/socketspace-jihad/tanya-backend/models/parent_student"
@@ -21,6 +23,18 @@ func (s *ScheduleParent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	params := r.URL.Query().Get("time")
+	if params == "" {
+		log.Println("ERROR TIME PARAMS")
+		http.Error(w, "'time' query params must be defined", http.StatusBadRequest)
+		return
+	}
+	t, err := time.Parse("2006-01-02", params)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	students, err := parent_student.ParentStudentDB.GetStudentsByParentID(parent.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -28,7 +42,10 @@ func (s *ScheduleParent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	studentsEvents := make(map[string][]school_class_events.SchoolClassEventsData)
 	for _, student := range students {
-		studentsEvents[student.Name], err = school_class_events.SchoolClassEventDB.GetBySchoolClassID(student.CurrentSchoolData.ID)
+		studentsEvents[student.Name], err = school_class_events.SchoolClassEventDB.GetBySchoolClassIDAndTimestamp(
+			student.CurrentSchoolData.ID,
+			t,
+		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

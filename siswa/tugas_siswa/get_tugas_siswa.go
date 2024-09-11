@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/socketspace-jihad/tanya-backend/middlewares"
-	"github.com/socketspace-jihad/tanya-backend/models/student_tasks"
+	"github.com/socketspace-jihad/tanya-backend/models/class_tasks_student"
 )
 
 type TugasSiswa struct{}
@@ -16,7 +16,7 @@ func (t *TugasSiswa) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	tugas, err := student_tasks.StudentTasksDB.GetByStudentID(student.ID)
+	tugas, err := class_tasks_student.ClassTasksStudentDB.GetByStudentProfilesID(student.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return

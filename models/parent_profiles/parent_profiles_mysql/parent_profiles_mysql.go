@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/parent_profiles"
 )
@@ -18,6 +19,37 @@ func (p *ParentProfilesMySQL) GetByID(id uint) (*parent_profiles.ParentProfilesD
 }
 
 func (p *ParentProfilesMySQL) Save(data *parent_profiles.ParentProfilesData) error {
+	tx, err := p.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	res, err := tx.Exec(`
+		INSERT INTO
+			parent_profiles
+		(
+			user_roles_id,
+			nik,
+			name
+		) VALUES (
+			?,?,?
+		) 
+	`,
+		data.UserRolesData.ID,
+		data.NIK,
+		data.Name,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	data.ID = uint(lastId)
+	tx.Commit()
 	return nil
 }
 

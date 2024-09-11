@@ -6,7 +6,7 @@ import (
 )
 
 type ParentStudentData struct {
-	ID          uint                                   `json:"parent_student"`
-	ParentData  []parent_profiles.ParentProfilesData   `json:"teacher_profiles"`
-	StudentData []student_profiles.StudentProfilesData `json:"student_profiles"`
+	ID                                   uint `json:"parent_student"`
+	parent_profiles.ParentProfilesData   `json:"parent_profiles"`
+	student_profiles.StudentProfilesData `json:"student_profiles"`
 }

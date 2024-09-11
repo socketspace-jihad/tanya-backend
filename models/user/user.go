@@ -1,15 +1,18 @@
 package user
 
+import "database/sql"
+
 var (
 	UserDB = &User{}
 )
 
 type UserData struct {
-	ID         uint   `json:"id" mapstructure:"id"`
-	Email      string `json:"email" mapstructure:"email"`
-	Password   string `json:"password"`
-	PlatformID uint8  `json:"platform_id"`
-	LastLogin  string `json:"last_login"`
+	ID         uint           `json:"id" mapstructure:"id"`
+	Email      string         `json:"email" mapstructure:"email"`
+	Password   string         `json:"password,omitempty"`
+	PlatformID uint8          `json:"platform_id"`
+	LastLogin  string         `json:"last_login,omitempty"`
+	FirstName  sql.NullString `json:"first_name"`
 }
 
 func (u *UserData) Valid() error {

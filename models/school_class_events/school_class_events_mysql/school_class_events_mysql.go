@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/event_types"
 	"github.com/socketspace-jihad/tanya-backend/models/school_class_events"
@@ -34,7 +35,8 @@ func (s *SchoolClassEventsMySQL) GetByTeacherProfilesID(id uint) ([]school_class
 			ce.end_date,
 			sc.name,
 			sr.name,
-			tp.name
+			tp.name,
+			sc.id
 		FROM
 			class_events AS ce
 		LEFT JOIN school_class AS sc
@@ -63,6 +65,56 @@ func (s *SchoolClassEventsMySQL) GetByTeacherProfilesID(id uint) ([]school_class
 			&data.SchoolClassData.Name,
 			&data.SchoolRoomsData.Name,
 			&data.TeacherProfilesData.Name,
+			&data.SchoolClassData.ID,
+		); err != nil {
+			return nil, err
+		}
+		events = append(events, data)
+	}
+
+	return events, nil
+}
+
+func (s *SchoolClassEventsMySQL) GetByTeacherProfilesIDAndTimeRange(id uint, time time.Time) ([]school_class_events.SchoolClassEventsData, error) {
+	row, err := s.db.Query(`
+		SELECT
+			ce.id,
+			ce.name,
+			ce.start_date,
+			ce.end_date,
+			sc.name,
+			sr.name,
+			tp.name,
+			sc.id
+		FROM
+			class_events AS ce
+		LEFT JOIN school_class AS sc
+			ON sc.id = ce.school_class_id
+		LEFT JOIN school_rooms AS sr
+			ON sr.id =  ce.school_rooms_id
+		LEFT JOIN teacher_profiles AS tp
+			ON ce.teacher_profiles_id = tp.id
+		WHERE ce.teacher_profiles_id = ? AND YEAR(ce.start_date) = YEAR(?) AND MONTH(ce.start_date) = MONTH(?) AND DAY(ce.start_date) = DAY(?)
+	`, id, time, time, time)
+	if err != nil {
+		return nil, err
+	}
+
+	var events []school_class_events.SchoolClassEventsData
+
+	for row.Next() {
+		data := school_class_events.SchoolClassEventsData{
+			TeacherProfilesData: &teacher_profiles.TeacherProfilesData{},
+		}
+		if err := row.Scan(
+			&data.ID,
+			&data.Name,
+			&data.StartDate,
+			&data.EndDate,
+			&data.SchoolClassData.Name,
+			&data.SchoolRoomsData.Name,
+			&data.TeacherProfilesData.Name,
+			&data.SchoolClassData.ID,
 		); err != nil {
 			return nil, err
 		}
@@ -81,11 +133,14 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassID(id uint) ([]school_class_eve
 			ce.end_date,
 			sc.name,
 			sr.name,
-			tp.name
+			tp.name,
+			s.name
 		FROM
 			class_events AS ce
 		LEFT JOIN school_class AS sc
 			ON sc.id = ce.school_class_id
+		LEFT JOIN schools AS s
+			ON s.id = sc.school_id
 		LEFT JOIN school_rooms AS sr
 			ON sr.id =  ce.school_rooms_id
 		LEFT JOIN teacher_profiles AS tp
@@ -110,6 +165,7 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassID(id uint) ([]school_class_eve
 			&data.SchoolClassData.Name,
 			&data.SchoolRoomsData.Name,
 			&data.TeacherProfilesData.Name,
+			&data.SchoolClassData.SchoolData.Name,
 		); err != nil {
 			return nil, err
 		}
@@ -137,8 +193,8 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassIDAndTimestamp(id uint, t time.
 		ON sr.id =  ce.school_rooms_id
 	LEFT JOIN teacher_profiles AS tp
 		ON tp.id = ce.teacher_profiles_id
-	WHERE ce.school_class_id = ? AND DATE(ce.end_date) = DATE(?)
-`, id, t)
+	WHERE ce.school_class_id = ? AND DAY(ce.start_date) = DAY(?) AND MONTH(ce.start_date) = MONTH(?) AND YEAR(ce.start_date) = YEAR(?)
+`, id, t, t, t)
 	if err != nil {
 		return nil, err
 	}

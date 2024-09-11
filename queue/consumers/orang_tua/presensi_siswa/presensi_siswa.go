@@ -33,14 +33,17 @@ func consumePresensiSiswa(e engine.QueueEngine) {
 				return
 			}
 
-			log.Println("ORANGTUA CONSUMERS: PRESENSI BARU SAJA DILAKUKAN SISWA", data)
 			notifier := notifierFactory()
 			err = notifier.Notify(&notification.Notification{
-				Title: "Putra/i Bapak/Ibu baru saja melakukan presensi Kelas",
-				Topic: fmt.Sprintf("%v.presensi-%v", orangtua.Consumer.Name, data.StudentProfilesData.ID),
+				Title:    fmt.Sprintf("%v baru saja melakukan presensi Kelas", data.StudentProfilesData.Name),
+				Subtitle: "Ketuk untuk melihat di mana lokasinya",
+				Topic:    fmt.Sprintf("%v.presensi-student-%v", orangtua.Consumer.Name, data.StudentProfilesData.ID),
 				Data: map[string]string{
 					"created_at": data.CreatedAt.String(),
 					"name":       data.StudentProfilesData.Name,
+					"page":       "notification",
+					"title":      fmt.Sprintf("%v baru saja melakukan presensi Kelas", data.StudentProfilesData.Name),
+					"subtitle":   "Ketuk untuk melihat di mana lokasinya",
 				},
 			})
 			if err != nil {

@@ -1,0 +1,3 @@
+package class_tasks
+
+var ClassTasksDB ClassTasksRepository

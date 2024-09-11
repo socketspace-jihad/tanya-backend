@@ -34,7 +34,7 @@ func AdminSekolahMiddleware(h http.Handler) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		if userRole.RoleID != roles.AdminSekolahRolesID {
+		if userRole.RolesData.ID != roles.AdminSekolahRolesID {
 			http.Error(w, "the role is not school admin", http.StatusUnauthorized)
 			return
 		}

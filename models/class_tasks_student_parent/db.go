@@ -1,0 +1,3 @@
+package class_tasks_student_parent
+
+var ClassTasksStudentParentDB ClassTasksStudentParent

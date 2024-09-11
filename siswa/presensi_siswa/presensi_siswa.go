@@ -60,15 +60,15 @@ func (p *PresensiSiswa) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	platformFactory, err := engine.GetQueueEngine(os.Getenv("PEMBUATAN_TUGAS_QUEUE_ENGINE"))
+	platformFactory, err := engine.GetQueueEngine(os.Getenv("PRESENSI_SISWA_QUEUE_ENGINE"))
 	if err != nil {
 		panic(err)
 	}
 	platform := platformFactory()
 	if err := platform.Connect(&engine.EngineAuthData{
-		Host:     os.Getenv("PEMBUATAN_TUGAS_QUEUE_HOST"),
-		Username: os.Getenv("PEMBUATAN_TUGAS_QUEUE_USERNAME"),
-		Password: os.Getenv("PEMBUATAN_TUGAS_QUEUE_PASSWORD"),
+		Host:     os.Getenv("PRESENSI_SISWA_QUEUE_HOST"),
+		Username: os.Getenv("PRESENSI_SISWA_QUEUE_USERNAME"),
+		Password: os.Getenv("PRESENSI_SISWA_QUEUE_PASSWORD"),
 	}); err != nil {
 		panic(err)
 	}

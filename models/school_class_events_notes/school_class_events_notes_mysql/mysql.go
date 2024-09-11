@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes"
 )
@@ -14,6 +15,38 @@ type SchoolClassEventsNotesMySQL struct {
 }
 
 func (s *SchoolClassEventsNotesMySQL) Save(data *school_class_events_notes.SchoolClassEventsNotesData) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	res, err := tx.Exec(`
+		INSERT INTO
+			class_events_notes
+		(
+			class_events_id,
+			title,
+			contents,
+			teacher_profiles_id	
+		)
+		VALUES (?,?,?,?)
+	`,
+		data.SchoolClassEventsData.ID,
+		data.Title,
+		data.Contents,
+		data.TeacherProfilesData.ID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	ids, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	data.ID = uint(ids)
+	tx.Commit()
 	return nil
 }
 

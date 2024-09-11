@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/user"
 	"github.com/socketspace-jihad/tanya-backend/models/user_token"

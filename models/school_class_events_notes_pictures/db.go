@@ -1,0 +1,5 @@
+package school_class_events_notes_pictures
+
+var (
+	SchoolClassEventsNotesPicturesDB SchoolClassEventsNotesPicturesRepository
+)

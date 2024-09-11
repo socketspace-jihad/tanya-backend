@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -23,7 +22,6 @@ func StudentClassMiddlewares(h http.HandlerFunc) http.HandlerFunc {
 		if studentClassID == "" {
 			http.Error(w, fmt.Errorf("this endpoint should be contains school_class_id query params").Error(), http.StatusBadRequest)
 		}
-		log.Println(studentClassID)
 		studentClassIDParsed, err := strconv.Atoi(studentClassID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
