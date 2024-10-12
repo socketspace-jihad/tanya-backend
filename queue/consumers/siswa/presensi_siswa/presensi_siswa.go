@@ -32,7 +32,6 @@ func consumePresensiSiswa(e engine.QueueEngine) {
 				log.Println(err)
 				return
 			}
-			log.Println("SISWA CONSUMERS: PRESENSI BARU SAJA DILAKUKAN SISWA", data)
 			notifier := notifierFactory()
 			err = notifier.Notify(&notification.Notification{
 				Title: "Putra/i Bapak/Ibu baru saja melakukan presensi Kelas",

@@ -37,7 +37,6 @@ func EventKelas(e engine.QueueEngine, consumer Consumer) {
 				return
 			}
 			notifier := notifierFactory()
-			fmt.Println(fmt.Sprintf("%v.event-kelas-%v", consumer.Name, data.ClassID))
 			err = notifier.Notify(&notification.Notification{
 				Title:    data.Title,
 				Subtitle: data.Subtitle,

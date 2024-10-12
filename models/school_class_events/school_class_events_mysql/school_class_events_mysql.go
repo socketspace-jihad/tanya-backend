@@ -134,7 +134,8 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassID(id uint) ([]school_class_eve
 			sc.name,
 			sr.name,
 			tp.name,
-			s.name
+			s.name,
+			ce.deskripsi
 		FROM
 			class_events AS ce
 		LEFT JOIN school_class AS sc
@@ -166,6 +167,7 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassID(id uint) ([]school_class_eve
 			&data.SchoolRoomsData.Name,
 			&data.TeacherProfilesData.Name,
 			&data.SchoolClassData.SchoolData.Name,
+			&data.Deskripsi,
 		); err != nil {
 			return nil, err
 		}
@@ -184,7 +186,8 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassIDAndTimestamp(id uint, t time.
 		ce.end_date,
 		sc.name,
 		sr.name,
-		tp.name
+		tp.name,
+		ce.deskripsi
 	FROM
 		class_events AS ce
 	LEFT JOIN school_class AS sc
@@ -213,6 +216,7 @@ func (s *SchoolClassEventsMySQL) GetBySchoolClassIDAndTimestamp(id uint, t time.
 			&data.SchoolClassData.Name,
 			&data.SchoolRoomsData.Name,
 			&data.TeacherProfilesData.Name,
+			&data.Deskripsi,
 		); err != nil {
 			return nil, err
 		}

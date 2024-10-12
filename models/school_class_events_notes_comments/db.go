@@ -1,5 +1,5 @@
 package school_class_events_notes_comments
 
 var (
-	SchoolClassEventsNotesPicturesDB SchoolClassEventsNotesCommentsRepository
+	SchoolClassEventsNotesCommentsDB SchoolClassEventsNotesCommentsRepository
 )

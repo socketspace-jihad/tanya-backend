@@ -5,24 +5,13 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/socketspace-jihad/tanya-backend/middlewares"
 	"github.com/socketspace-jihad/tanya-backend/models/user"
+	"github.com/socketspace-jihad/tanya-backend/utils"
 )
-
-func tokenParser(token string) (string, error) {
-	if token == "" {
-		return "", errors.New("authorization header cannot be nil")
-	}
-	parsed := strings.Split(token, " ")
-	if len(parsed) < 2 {
-		return "", errors.New("invalid token format")
-	}
-	return parsed[1], nil
-}
 
 func GetUser(r *http.Request) (*user.UserData, error) {
 	user, ok := r.Context().Value(middlewares.ContextKey("user")).(user.UserData)
@@ -35,7 +24,7 @@ func GetUser(r *http.Request) (*user.UserData, error) {
 func AuthMiddlewareHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
-		t, err := tokenParser(tokenString)
+		t, err := utils.TokenParser(tokenString)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

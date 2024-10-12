@@ -8,12 +8,13 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/socketspace-jihad/tanya-backend/middlewares"
 	"github.com/socketspace-jihad/tanya-backend/models/roles"
+	"github.com/socketspace-jihad/tanya-backend/utils"
 )
 
 func AdminSekolahMiddleware(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
-		t, err := tokenParser(tokenString)
+		t, err := utils.TokenParser(tokenString)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

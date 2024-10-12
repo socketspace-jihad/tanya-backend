@@ -10,7 +10,7 @@ import (
 )
 
 type TeacherProfilesData struct {
-	ID                             uint   `json:"id"`
+	ID                             uint   `json:"id",omitempty`
 	Name                           string `json:"name"`
 	user_roles.UserRolesData       `json:"user_roles"`
 	schools.SchoolData             `json:"school"`

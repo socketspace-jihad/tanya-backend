@@ -8,6 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/teacher_profiles"
+	"github.com/socketspace-jihad/tanya-backend/models/user"
+	"github.com/socketspace-jihad/tanya-backend/models/user_roles"
 )
 
 type TeacherProfileMySQL struct {
@@ -54,18 +56,28 @@ func (t *TeacherProfileMySQL) Save(profile *teacher_profiles.TeacherProfilesData
 func (t *TeacherProfileMySQL) GetByID(id uint) (*teacher_profiles.TeacherProfilesData, error) {
 	q, err := t.db.Query(`
 		SELECT 
-			id,
-			school_id,
-			name,
-			contact,
-			address
-		FROM teacher_profiles WHERE id=?`,
+			tp.id,
+			tp.school_id,
+			tp.name,
+			tp.contact,
+			tp.address,
+			u.email
+		FROM teacher_profiles AS tp 
+		LEFT JOIN user_roles AS ur
+			ON ur.id = tp.user_roles_id
+		LEFT JOIN user AS u
+			ON u.id = ur.user_id
+		WHERE tp.id=?`,
 		id,
 	)
 	if err != nil {
 		return nil, err
 	}
-	data := &teacher_profiles.TeacherProfilesData{}
+	data := &teacher_profiles.TeacherProfilesData{
+		UserRolesData: user_roles.UserRolesData{
+			UserData: user.UserData{},
+		},
+	}
 	for q.Next() {
 		q.Scan(
 			&data.ID,
@@ -73,6 +85,7 @@ func (t *TeacherProfileMySQL) GetByID(id uint) (*teacher_profiles.TeacherProfile
 			&data.Name,
 			&data.Contact,
 			&data.Address,
+			&data.UserRolesData.UserData.Email,
 		)
 	}
 	return data, nil

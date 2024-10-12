@@ -10,6 +10,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/socketspace-jihad/tanya-backend/middlewares"
 	"github.com/socketspace-jihad/tanya-backend/models/user_roles"
+	"github.com/socketspace-jihad/tanya-backend/utils"
 )
 
 func GetUserRoles(r *http.Request) (*user_roles.UserRolesData, error) {
@@ -23,7 +24,7 @@ func GetUserRoles(r *http.Request) (*user_roles.UserRolesData, error) {
 func RolesMiddlewareHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
-		t, err := tokenParser(tokenString)
+		t, err := utils.TokenParser(tokenString)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return

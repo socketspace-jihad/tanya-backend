@@ -2,7 +2,6 @@ package get_detail_chats
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -20,7 +19,6 @@ func (g *GetDetailChats) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	log.Println(globalChatsID)
 	chats, err := global_chats_detail.GlobalChatDetailsDB.GetByGlobalChatsID(uint(globalChatsID))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -5,4 +5,5 @@ const (
 	TSekolahPresensiSiswa  = "sekolah.presensi_siswa"
 
 	TEventKelas = "event_kelas"
+	TEventSiswa = "event_siswa"
 )

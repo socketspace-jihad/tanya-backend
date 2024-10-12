@@ -1,4 +1,4 @@
-package guru
+package catatan_kelas
 
 import (
 	"encoding/json"

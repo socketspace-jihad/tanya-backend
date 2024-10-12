@@ -162,6 +162,62 @@ func (s *StudentProfilesMySQL) Save(data *student_profiles.StudentProfilesData) 
 	return nil
 }
 
+func (s *StudentProfilesMySQL) GetBySchoolClassID(schoolClassID uint) ([]student_profiles.StudentProfilesData, error) {
+	tx, err := s.db.BeginTx(context.Background(), nil)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	rows, err := tx.Query(`
+		SELECT
+			sp.id,
+			sp.school_id,
+			sp.nisn,
+			sp.current_school_class_id,
+			sp.name,
+			vs.id,
+			vs.name,
+			u.email,
+			u.id
+		FROM 
+			student_profiles AS sp
+		LEFT JOIN verified_status AS vs
+			ON vs.id = sp.verified_status_id
+		LEFT JOIN user_roles AS ur
+			ON sp.user_roles_id = ur.id
+		LEFT JOIN user AS u
+			ON u.id = ur.user_id
+		WHERE current_school_class_id=?`, schoolClassID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	var students []student_profiles.StudentProfilesData
+	for rows.Next() {
+		var data student_profiles.StudentProfilesData
+		if err := rows.Scan(
+			&data.ID,
+			&data.SchoolData.ID,
+			&data.NISN,
+			&data.CurrentSchoolData.ID,
+			&data.Name,
+			&data.VerifiedStatus.ID,
+			&data.VerifiedStatus.Name,
+			&data.UserData.Email,
+			&data.UserData.ID,
+		); err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		students = append(students, data)
+	}
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return students, nil
+}
+
 func init() {
 	creds := &models.DBCreds{
 		Username: os.Getenv("DATABASE_USERNAME"),

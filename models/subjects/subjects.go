@@ -1,6 +1,8 @@
 package subjects
 
+import "database/sql"
+
 type SubjectsData struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID   uint           `json:"id"`
+	Name sql.NullString `json:"name"`
 }

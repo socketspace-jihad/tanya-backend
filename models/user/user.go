@@ -8,6 +8,7 @@ var (
 
 type UserData struct {
 	ID         uint           `json:"id" mapstructure:"id"`
+	UUID       string         `json:"uuid" mapstructure:uuid`
 	Email      string         `json:"email" mapstructure:"email"`
 	Password   string         `json:"password,omitempty"`
 	PlatformID uint8          `json:"platform_id"`

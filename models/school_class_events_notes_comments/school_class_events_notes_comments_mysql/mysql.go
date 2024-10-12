@@ -7,7 +7,10 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
+	"github.com/socketspace-jihad/tanya-backend/models/parent_profiles"
 	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_comments"
+	"github.com/socketspace-jihad/tanya-backend/models/student_profiles"
+	"github.com/socketspace-jihad/tanya-backend/models/teacher_profiles"
 )
 
 type SchoolClassEventsNotesCommentsMySQL struct {
@@ -20,17 +23,46 @@ func (s *SchoolClassEventsNotesCommentsMySQL) Save(data *school_class_events_not
 		tx.Rollback()
 		return err
 	}
+	var teacherProfilesID sql.NullInt64
+	if data.TeacherProfilesData != nil {
+		teacherProfilesID = sql.NullInt64{
+			Int64: int64(data.TeacherProfilesData.ID),
+			Valid: true,
+		}
+	}
+
+	var parentProfilesID sql.NullInt64
+	if data.ParentProfilesData != nil {
+		parentProfilesID = sql.NullInt64{
+			Int64: int64(data.ParentProfilesData.ID),
+			Valid: true,
+		}
+	}
+
+	var studentProfilesID sql.NullInt64
+	if data.StudentProfilesData != nil {
+		studentProfilesID = sql.NullInt64{
+			Int64: int64(data.StudentProfilesData.ID),
+			Valid: true,
+		}
+	}
 	res, err := tx.Exec(`
 		INSERT INTO
-			class_events_notes_pictures
+			class_events_notes_comments
 		(
-			path,
-			class_events_notes_id
+			class_events_notes_id,
+			teacher_profiles_id,
+			parent_profiles_id,
+			student_profiles_id,
+			content
 		)
-		VALUES (?,?)
+		VALUES (?,?,?,?,?)
 	`,
-		data.Path,
 		data.SchoolClassEventsNotesData.ID,
+		teacherProfilesID,
+		parentProfilesID,
+		studentProfilesID,
+		data.Content,
 	)
 	if err != nil {
 		tx.Rollback()
@@ -49,26 +81,49 @@ func (s *SchoolClassEventsNotesCommentsMySQL) Save(data *school_class_events_not
 func (s *SchoolClassEventsNotesCommentsMySQL) GetByClassEventsNotesID(id uint) ([]school_class_events_notes_comments.SchoolClassEventsNotesCommentsData, error) {
 	rows, err := s.db.Query(`
 		SELECT
-			cenp.id,
-			cenp.path,
-			cenp.class_events_notes_id
-		FROM class_events_notes_pictures AS cenp
-		WHERE cenp.class_events_notes_id = ?
+			cenc.id,
+			IFNULL(tp.id,0),
+			IFNULL(tp.name,""),
+			IFNULL(pp.id,0),
+			IFNULL(pp.name,""),
+			IFNULL(sp.id,0),
+			IFNULL(sp.name,""),
+			content,
+			cenc.created_at
+		FROM class_events_notes_comments AS cenc
+		LEFT JOIN teacher_profiles AS tp
+			ON tp.id = cenc.teacher_profiles_id
+		LEFT JOIN parent_profiles AS pp
+			ON pp.id = cenc.parent_profiles_id
+		LEFT JOIN student_profiles AS sp
+			ON sp.id = cenc.student_profiles_id
+		WHERE cenc.class_events_notes_id = ?
+		ORDER BY created_at DESC
 	`, id)
 	if err != nil {
 		return nil, err
 	}
-	var notes []school_class_events_notes_comments.SchoolClassEventsNotesCommentsData
+	var comments []school_class_events_notes_comments.SchoolClassEventsNotesCommentsData
 	for rows.Next() {
-		var note school_class_events_notes_comments.SchoolClassEventsNotesCommentsData
+		comment := school_class_events_notes_comments.SchoolClassEventsNotesCommentsData{
+			TeacherProfilesData: &teacher_profiles.TeacherProfilesData{},
+			ParentProfilesData:  &parent_profiles.ParentProfilesData{},
+			StudentProfilesData: &student_profiles.StudentProfilesData{},
+		}
 		rows.Scan(
-			&note.ID,
-			&note.Path,
-			&note.SchoolClassEventsNotesData.ID,
+			&comment.ID,
+			&comment.TeacherProfilesData.ID,
+			&comment.TeacherProfilesData.Name,
+			&comment.ParentProfilesData.ID,
+			&comment.ParentProfilesData.Name,
+			&comment.StudentProfilesData.ID,
+			&comment.StudentProfilesData.Name,
+			&comment.Content,
+			&comment.CreatedAt,
 		)
-		notes = append(notes, note)
+		comments = append(comments, comment)
 	}
-	return notes, nil
+	return comments, nil
 }
 
 func init() {
@@ -84,7 +139,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	school_class_events_notes_comments.SchoolClassEventsNotesPicturesDB = &SchoolClassEventsNotesCommentsMySQL{
+	school_class_events_notes_comments.SchoolClassEventsNotesCommentsDB = &SchoolClassEventsNotesCommentsMySQL{
 		db: db,
 	}
 }

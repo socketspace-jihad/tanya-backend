@@ -7,6 +7,7 @@ import (
 	"github.com/socketspace-jihad/tanya-backend/models/presensi_types"
 	"github.com/socketspace-jihad/tanya-backend/models/school_class_events"
 	"github.com/socketspace-jihad/tanya-backend/models/student_profiles"
+	"github.com/socketspace-jihad/tanya-backend/models/teacher_profiles"
 )
 
 type StudentPresensiData struct {
@@ -19,4 +20,5 @@ type StudentPresensiData struct {
 	Longitude                                  *float32  `json:"longitude"`
 	*school_class_events.SchoolClassEventsData `json:"school_class_events"`
 	*presensi_types.PresensitypesData          `json:"presensi_types"`
+	*teacher_profiles.TeacherProfilesData      `json:"teacher_profiles"`
 }

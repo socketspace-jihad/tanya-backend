@@ -1,6 +1,8 @@
 package student_profiles
 
 import (
+	"database/sql"
+
 	"github.com/socketspace-jihad/tanya-backend/models/school_class"
 	"github.com/socketspace-jihad/tanya-backend/models/schools"
 	"github.com/socketspace-jihad/tanya-backend/models/user_roles"
@@ -8,9 +10,9 @@ import (
 )
 
 type StudentProfilesData struct {
-	ID                       uint `json:"id"`
+	ID                       uint `json:"id",omitempty`
 	user_roles.UserRolesData `json:"user_roles" mapstructure:"user_roles"`
-	NISN                     string `json:"nisn"`
+	NISN                     sql.NullString `json:"nisn"`
 	schools.SchoolData       `json:"school"`
 	Name                     string                         `json:"name"`
 	CurrentSchoolData        school_class.SchoolClassData   `json:"current_school_class"`

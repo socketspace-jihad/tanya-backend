@@ -31,11 +31,19 @@ func (m *UserMySQL) Save(u user.UserData) error {
 	if err != nil {
 		return err
 	}
-	hashed, err := bcrypt.GenerateFromPassword([]byte(u.Password), 8)
-	if err != nil {
-		return err
+	var hashed []byte
+	if len(u.Password) > 72 {
+		hashed, err = bcrypt.GenerateFromPassword([]byte(u.UUID), 8)
+		if err != nil {
+			return err
+		}
+	} else {
+		hashed, err = bcrypt.GenerateFromPassword([]byte(u.Password), 8)
+		if err != nil {
+			return err
+		}
 	}
-	_, err = tx.Query("INSERT INTO user (email,password,platform_id) VALUES (?,?,?)", u.Email, string(hashed), u.PlatformID)
+	_, err = tx.Query("INSERT INTO user (email,password,platform_id,first_name) VALUES (?,?,?,?)", u.Email, string(hashed), u.PlatformID, u.FirstName.String)
 	return err
 }
 

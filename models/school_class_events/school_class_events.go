@@ -12,7 +12,7 @@ import (
 type SchoolClassEventsData struct {
 	ID                                    uint `json:"id"`
 	*subjects.SubjectsData                `json:"subjects"`
-	Name                                  string    `json:"name"`
+	Name                                  *string   `json:"name"`
 	CreatedAt                             time.Time `json:"created_at"`
 	StartDate                             time.Time `json:"start_date"`
 	EndDate                               time.Time `json:"end_date"`
@@ -22,4 +22,5 @@ type SchoolClassEventsData struct {
 	PresentTeacherProfiles                *teacher_profiles.TeacherProfilesData `json:"present_teacher_profiles"`
 	PresentTeacherDate                    *time.Time                            `json:"present_teacher_date"`
 	PresensiDate                          *time.Time                            `json:"presensi_date"`
+	Deskripsi                             *string                               `json:"deskripsi"`
 }

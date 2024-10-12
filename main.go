@@ -9,9 +9,13 @@ import (
 	"syscall"
 
 	_ "github.com/socketspace-jihad/tanya-backend/auth"
+	_ "github.com/socketspace-jihad/tanya-backend/class/event_presensi"
 	_ "github.com/socketspace-jihad/tanya-backend/class/events_notes"
+	_ "github.com/socketspace-jihad/tanya-backend/class/student_class"
 	_ "github.com/socketspace-jihad/tanya-backend/guru"
 	_ "github.com/socketspace-jihad/tanya-backend/guru/catatan_kelas"
+	_ "github.com/socketspace-jihad/tanya-backend/guru/catatan_personal"
+	_ "github.com/socketspace-jihad/tanya-backend/guru/presensi_siswa"
 	_ "github.com/socketspace-jihad/tanya-backend/guru/profile_guru"
 	_ "github.com/socketspace-jihad/tanya-backend/guru/registrasi_guru"
 	_ "github.com/socketspace-jihad/tanya-backend/guru/schedule_guru"
@@ -30,7 +34,10 @@ import (
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events/school_class_events_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes/school_class_events_notes_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_comments/school_class_events_notes_comments_mysql"
+	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal/school_class_events_notes_personal_mysql"
+	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_pictures/school_class_events_notes_personal_pictures_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_pictures/school_class_events_notes_mysql"
+	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_viewer/school_class_events_notes_viewer_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/schools/schools_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/student_events/student_events_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/student_presensi/student_presensi_mysql"
@@ -39,7 +46,11 @@ import (
 	_ "github.com/socketspace-jihad/tanya-backend/models/teacher_profiles/teacher_profiles_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/user/user_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/user_roles/user_roles_mysql"
+	_ "github.com/socketspace-jihad/tanya-backend/models/user_topics/user_topics_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/notification/fcm"
+	_ "github.com/socketspace-jihad/tanya-backend/parent/catatan_kelas"
+	_ "github.com/socketspace-jihad/tanya-backend/parent/catatan_personal"
+	_ "github.com/socketspace-jihad/tanya-backend/parent/kegiatan_siswa_parent"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/registrasi_parent"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/schedule_parent"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/siswa_parent"
@@ -47,6 +58,7 @@ import (
 
 	// _ "github.com/socketspace-jihad/tanya-backend/queue/consumers/guru/event_kelas"
 	_ "github.com/socketspace-jihad/tanya-backend/queue/consumers/orang_tua/event_kelas"
+	_ "github.com/socketspace-jihad/tanya-backend/queue/consumers/orang_tua/event_siswa"
 	_ "github.com/socketspace-jihad/tanya-backend/queue/consumers/orang_tua/pembuatan_tugas"
 	_ "github.com/socketspace-jihad/tanya-backend/queue/consumers/orang_tua/presensi_siswa"
 
@@ -63,6 +75,7 @@ import (
 	_ "github.com/socketspace-jihad/tanya-backend/user/chats/get_chats"
 	_ "github.com/socketspace-jihad/tanya-backend/user/chats/get_detail_chats"
 	_ "github.com/socketspace-jihad/tanya-backend/user/chats/send_chats"
+	_ "github.com/socketspace-jihad/tanya-backend/user/topics"
 )
 
 var proc atomic.Int32
