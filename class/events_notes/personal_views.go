@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	"github.com/socketspace-jihad/tanya-backend/middlewares/auth"
-	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_comments"
+	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_viewer"
 )
 
-type CatatanPersonalComments struct{}
+type CatatanPersonalViews struct{}
 
-func (c *CatatanPersonalComments) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (c *CatatanPersonalViews) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		params := r.URL.Query().Get("class_events_id")
@@ -24,17 +24,17 @@ func (c *CatatanPersonalComments) ServeHTTP(w http.ResponseWriter, r *http.Reque
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		comments, err := school_class_events_notes_comments.SchoolClassEventsNotesCommentsDB.GetByClassEventsNotesID(uint(classEventsID))
+		viewer, err := school_class_events_notes_personal_viewer.SchoolClassEventsNotesPersonalViewerDB.GetByClassEventsNotesID(uint(classEventsID))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(comments)
+		json.NewEncoder(w).Encode(viewer)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
 func init() {
-	http.DefaultServeMux.Handle("/v1/class/events/notes/comments", auth.AuthMiddlewareHandler(&CatatanPersonalComments{}))
+	http.DefaultServeMux.Handle("/v1/class/events/notes/personal/viewer", auth.AuthMiddlewareHandler(&CatatanPersonalViews{}))
 }

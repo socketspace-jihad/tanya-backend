@@ -96,6 +96,44 @@ func (s *SchoolClassEventsNotesPersonalMySQL) GetByTeacherAndClassEventsID(class
 	return events, nil
 }
 
+func (s *SchoolClassEventsNotesPersonalMySQL) GetByTeacherProfilesID(teacherID uint) ([]school_class_events_notes_personal.SchoolClassEventsNotesPersonalData, error) {
+	rows, err := s.DB.Query(`
+		SELECT
+			cenp.id,
+			cenp.judul,
+			cenp.deskripsi,
+			sp.id,
+			sp.name
+		FROM
+			class_events_notes_personal AS cenp
+		LEFT JOIN
+			student_profiles AS sp
+			ON sp.id = cenp.student_profiles_id
+		WHERE
+			cenp.teacher_profiles_id = ?
+	`, teacherID)
+	if err != nil {
+		return nil, err
+	}
+	var events []school_class_events_notes_personal.SchoolClassEventsNotesPersonalData
+	for rows.Next() {
+		event := school_class_events_notes_personal.SchoolClassEventsNotesPersonalData{
+			StudentProfilesData: student_profiles.StudentProfilesData{},
+		}
+		if err := rows.Scan(
+			&event.ID,
+			&event.Judul,
+			&event.Deskripsi,
+			&event.StudentProfilesData.ID,
+			&event.StudentProfilesData.Name,
+		); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
 func (s *SchoolClassEventsNotesPersonalMySQL) GetByParentAndClassEventsID(classEvents uint, parentID uint) ([]school_class_events_notes_personal.SchoolClassEventsNotesPersonalData, error) {
 	rows, err := s.DB.Query(`
 		SELECT
@@ -119,6 +157,54 @@ func (s *SchoolClassEventsNotesPersonalMySQL) GetByParentAndClassEventsID(classE
 		WHERE
 			ps.parent_profiles_id = ? AND cenp.class_events_id = ? 
 	`, parentID, classEvents)
+	if err != nil {
+		return nil, err
+	}
+	var events []school_class_events_notes_personal.SchoolClassEventsNotesPersonalData
+	for rows.Next() {
+		event := school_class_events_notes_personal.SchoolClassEventsNotesPersonalData{
+			StudentProfilesData: student_profiles.StudentProfilesData{},
+			TeacherProfilesData: teacher_profiles.TeacherProfilesData{},
+		}
+		if err := rows.Scan(
+			&event.ID,
+			&event.Judul,
+			&event.Deskripsi,
+			&event.StudentProfilesData.ID,
+			&event.StudentProfilesData.Name,
+			&event.TeacherProfilesData.ID,
+			&event.TeacherProfilesData.Name,
+		); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
+func (s *SchoolClassEventsNotesPersonalMySQL) GetByParentAndStudentProfilesID(studentID uint, parentID uint) ([]school_class_events_notes_personal.SchoolClassEventsNotesPersonalData, error) {
+	rows, err := s.DB.Query(`
+		SELECT
+			cenp.id,
+			cenp.judul,
+			cenp.deskripsi,
+			sp.id,
+			sp.name,
+			tp.id,
+			tp.name
+		FROM
+			class_events_notes_personal AS cenp
+		LEFT JOIN teacher_profiles AS tp
+			ON tp.id = cenp.teacher_profiles_id
+		LEFT JOIN
+			student_profiles AS sp
+			ON sp.id = cenp.student_profiles_id
+		LEFT JOIN
+			parent_student AS ps
+			ON ps.student_profiles_id = sp.id
+		WHERE
+			ps.parent_profiles_id = ? AND ps.student_profiles_id = ? 
+	`, parentID, studentID)
 	if err != nil {
 		return nil, err
 	}

@@ -35,7 +35,9 @@ import (
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes/school_class_events_notes_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_comments/school_class_events_notes_comments_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal/school_class_events_notes_personal_mysql"
+	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_comments/school_class_events_notes_personal_comments_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_pictures/school_class_events_notes_personal_pictures_mysql"
+	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_viewer/school_class_events_notes_personal_viewer_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_pictures/school_class_events_notes_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_viewer/school_class_events_notes_viewer_mysql"
 	_ "github.com/socketspace-jihad/tanya-backend/models/schools/schools_mysql"
@@ -75,6 +77,7 @@ import (
 	_ "github.com/socketspace-jihad/tanya-backend/user/chats/get_chats"
 	_ "github.com/socketspace-jihad/tanya-backend/user/chats/get_detail_chats"
 	_ "github.com/socketspace-jihad/tanya-backend/user/chats/send_chats"
+	_ "github.com/socketspace-jihad/tanya-backend/user/notification"
 	_ "github.com/socketspace-jihad/tanya-backend/user/topics"
 )
 

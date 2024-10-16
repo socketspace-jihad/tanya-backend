@@ -25,7 +25,7 @@ func (m *UserMySQL) ValidateConnection() error {
 	return nil
 }
 
-func (m *UserMySQL) Save(u user.UserData) error {
+func (m *UserMySQL) Save(u *user.UserData) error {
 	tx, err := m.db.BeginTx(context.Background(), nil)
 	defer tx.Commit()
 	if err != nil {
@@ -43,7 +43,18 @@ func (m *UserMySQL) Save(u user.UserData) error {
 			return err
 		}
 	}
-	_, err = tx.Query("INSERT INTO user (email,password,platform_id,first_name) VALUES (?,?,?,?)", u.Email, string(hashed), u.PlatformID, u.FirstName.String)
+	res, err := tx.Exec("INSERT INTO user (email,password,platform_id,first_name) VALUES (?,?,?,?)", u.Email, string(hashed), u.PlatformID, u.FirstName.String)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	u.ID = uint(id)
 	return err
 }
 

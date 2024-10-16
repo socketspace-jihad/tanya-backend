@@ -8,7 +8,7 @@ import (
 
 type UserRepository interface {
 	ValidateConnection() error
-	Save(UserData) error
+	Save(*UserData) error
 	List() UsersData
 	GetByID(uint) (UserData, error)
 	GetByEmail(string) (UserData, error)

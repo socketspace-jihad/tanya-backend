@@ -26,7 +26,7 @@ type User struct {
 	Repo UserRepository
 }
 
-func (u *User) Save(user UserData) error {
+func (u *User) Save(user *UserData) error {
 	return u.Repo.Save(user)
 }
 

@@ -18,7 +18,7 @@ func (a *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := user.UserDB.Repo.Save(u); err != nil {
+	if err := user.UserDB.Repo.Save(&u); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

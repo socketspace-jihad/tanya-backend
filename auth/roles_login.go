@@ -8,12 +8,10 @@ import (
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/socketspace-jihad/tanya-backend/middlewares"
 	"github.com/socketspace-jihad/tanya-backend/middlewares/auth"
 	"github.com/socketspace-jihad/tanya-backend/models/parent_profiles"
 	"github.com/socketspace-jihad/tanya-backend/models/student_profiles"
 	"github.com/socketspace-jihad/tanya-backend/models/teacher_profiles"
-	"github.com/socketspace-jihad/tanya-backend/models/user"
 	"github.com/socketspace-jihad/tanya-backend/models/user_roles"
 )
 
@@ -22,8 +20,8 @@ type RolesLogin struct {
 }
 
 func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	u, ok := r.Context().Value(middlewares.ContextKey("user")).(user.UserData)
-	if !ok {
+	u, err := auth.GetUser(r)
+	if err != nil {
 		http.Error(w, errors.New("jwt token invalid").Error(), http.StatusUnauthorized)
 		return
 	}
@@ -42,12 +40,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := user.UserDB.Repo.GetByEmail(u.Email)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	userRole, err = user_roles.UserRolesDB.GetByRoleAndUserID(userRole.RolesData.ID, data.ID)
+	userRole, err = user_roles.UserRolesDB.GetByRoleAndUserID(userRole.RolesData.ID, u.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -67,7 +60,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		teacher.UserRolesData = userRole
-		teacher.UserRolesData.UserData = u
+		teacher.UserRolesData.UserData = *u
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, teacher)
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 		if err != nil {
@@ -85,7 +78,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		student.UserRolesData = userRole
-		student.UserRolesData.UserData = u
+		student.UserRolesData.UserData = *u
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, student)
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 		if err != nil {
@@ -103,7 +96,7 @@ func (a *RolesLogin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		parent.UserRolesData = userRole
-		parent.UserRolesData.UserData = u
+		parent.UserRolesData.UserData = *u
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, parent)
 		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SIGNING_KEY")))
 		if err != nil {

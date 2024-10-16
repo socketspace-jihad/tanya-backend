@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	"github.com/socketspace-jihad/tanya-backend/middlewares/auth"
-	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_comments"
+	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_comments"
 )
 
-type CatatanPersonalComments struct{}
+type CatatanKelasComments struct{}
 
-func (c *CatatanPersonalComments) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (c *CatatanKelasComments) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		params := r.URL.Query().Get("class_events_id")
@@ -24,7 +24,7 @@ func (c *CatatanPersonalComments) ServeHTTP(w http.ResponseWriter, r *http.Reque
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		comments, err := school_class_events_notes_comments.SchoolClassEventsNotesCommentsDB.GetByClassEventsNotesID(uint(classEventsID))
+		comments, err := school_class_events_notes_personal_comments.SchoolClassEventsNotesPersonalCommentsDB.GetByClassEventsNotesID(uint(classEventsID))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -36,5 +36,5 @@ func (c *CatatanPersonalComments) ServeHTTP(w http.ResponseWriter, r *http.Reque
 }
 
 func init() {
-	http.DefaultServeMux.Handle("/v1/class/events/notes/comments", auth.AuthMiddlewareHandler(&CatatanPersonalComments{}))
+	http.DefaultServeMux.Handle("/v1/class/events/notes/personal/comments", auth.AuthMiddlewareHandler(&CatatanKelasComments{}))
 }

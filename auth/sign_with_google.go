@@ -28,12 +28,13 @@ func (s *SignWithGoogle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// do login logic
+	// do register
 	if data.ID == 0 {
-		if err := user.UserDB.Repo.Save(u); err != nil {
+		if err := user.UserDB.Repo.Save(&u); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		data.ID = u.ID
 	}
 	data.Password = ""
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &data)

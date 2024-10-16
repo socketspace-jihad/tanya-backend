@@ -2,12 +2,10 @@ package registrasi_parent
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 	"net/http"
 
-	"github.com/socketspace-jihad/tanya-backend/middlewares"
 	"github.com/socketspace-jihad/tanya-backend/middlewares/auth"
 	"github.com/socketspace-jihad/tanya-backend/models/parent_profiles"
 	"github.com/socketspace-jihad/tanya-backend/models/roles"
@@ -18,9 +16,9 @@ import (
 type RegistrasiParent struct{}
 
 func (rs *RegistrasiParent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	u, ok := r.Context().Value(middlewares.ContextKey("user")).(user.UserData)
-	if !ok {
-		http.Error(w, errors.New("jwt token invalid").Error(), http.StatusUnauthorized)
+	u, err := auth.GetUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

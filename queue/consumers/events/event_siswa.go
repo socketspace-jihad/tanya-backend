@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	notification_model "github.com/socketspace-jihad/tanya-backend/models/notification"
 	"github.com/socketspace-jihad/tanya-backend/notification"
 	"github.com/socketspace-jihad/tanya-backend/queue"
 	"github.com/socketspace-jihad/tanya-backend/queue/engine"
@@ -15,6 +16,7 @@ type EventSiswaData struct {
 	StudentID uint
 	Title     string
 	Subtitle  string
+	notification_model.NotificationData
 }
 
 func EventSiswa(e engine.QueueEngine, consumer Consumer) {

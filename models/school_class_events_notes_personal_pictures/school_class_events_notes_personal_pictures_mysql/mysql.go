@@ -22,10 +22,10 @@ func (s *SchoolClassEventsNotesPersonalPicturesMySQL) Save(data *school_class_ev
 	}
 	res, err := tx.Exec(`
 		INSERT INTO
-			class_events_notes_pictures
+			class_events_notes_personal_pictures
 		(
 			path,
-			class_events_notes_id
+			class_events_notes_personal_id
 		)
 		VALUES (?,?)
 	`,
@@ -51,9 +51,9 @@ func (s *SchoolClassEventsNotesPersonalPicturesMySQL) GetByClassEventsNotesID(id
 		SELECT
 			cenp.id,
 			cenp.path,
-			cenp.class_events_notes_id
-		FROM class_events_notes_pictures AS cenp
-		WHERE cenp.class_events_notes_id = ?
+			cenp.class_events_notes_personal_id
+		FROM class_events_notes_personal_pictures AS cenp
+		WHERE cenp.class_events_notes_personal_id = ?
 	`, id)
 	if err != nil {
 		return nil, err

@@ -5,4 +5,6 @@ type SchoolClassEventsNotesPersonalRepository interface {
 	GetByID(uint) (*SchoolClassEventsNotesPersonalData, error)
 	GetByTeacherAndClassEventsID(uint, uint) ([]SchoolClassEventsNotesPersonalData, error)
 	GetByParentAndClassEventsID(uint, uint) ([]SchoolClassEventsNotesPersonalData, error)
+	GetByParentAndStudentProfilesID(uint, uint) ([]SchoolClassEventsNotesPersonalData, error)
+	GetByTeacherProfilesID(uint) ([]SchoolClassEventsNotesPersonalData, error)
 }

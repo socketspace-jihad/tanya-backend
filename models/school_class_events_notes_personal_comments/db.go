@@ -1,0 +1,5 @@
+package school_class_events_notes_personal_comments
+
+var (
+	SchoolClassEventsNotesPersonalCommentsDB SchoolClassEventsNotesPersonalCommentsRepository
+)

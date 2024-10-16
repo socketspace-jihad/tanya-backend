@@ -3,6 +3,7 @@ package notification_mysql
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -18,6 +19,63 @@ func (n *NotificationMySQL) GetByID(id uint) (*notification.NotificationData, er
 	return nil, nil
 }
 
+func (n *NotificationMySQL) Save(data *notification.NotificationData) error {
+	log.Println("SAVING", data)
+	tx, err := n.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	res, err := tx.Exec(`
+		INSERT INTO
+			notification
+		(
+			title,
+			contents,
+			target_path,
+			user_id,
+			data
+		)
+		VALUES (?,?,?,?,?)
+	`,
+		data.Title,
+		data.Contents,
+		data.TargetPath,
+		data.UserData.ID,
+		data.Data,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	data.ID = uint(id)
+	tx.Commit()
+	return nil
+}
+
+func (n *NotificationMySQL) UpdateRead(data *notification.NotificationData) error {
+	tx, err := n.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.Exec(`
+		UPDATE notification
+		SET read_status = 1
+		WHERE id = ? AND user_id = ?
+	`, data.ID, data.UserData.ID); err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
 func (n *NotificationMySQL) GetByUserID(id uint) ([]notification.NotificationData, error) {
 	rows, err := n.db.Query(`
 		SELECT
@@ -26,7 +84,8 @@ func (n *NotificationMySQL) GetByUserID(id uint) ([]notification.NotificationDat
 			contents,
 			created_at,
 			target_path,
-			read_status
+			read_status,
+			data
 		FROM notification
 		WHERE user_id = ?
 	`, id)
@@ -43,7 +102,9 @@ func (n *NotificationMySQL) GetByUserID(id uint) ([]notification.NotificationDat
 			&notification.CreatedAt,
 			&notification.TargetPath,
 			&notification.ReadStatus,
+			&notification.Data,
 		); err != nil {
+			log.Println("ERR", err)
 			return nil, err
 		}
 		notifications = append(notifications, notification)
@@ -59,7 +120,8 @@ func (n *NotificationMySQL) GetByStudentProfilesID(id uint) ([]notification.Noti
 			contents,
 			created_at,
 			target_path,
-			read_status
+			read_status,
+			data
 		FROM notification
 		WHERE student_profiles_id = ?
 	`, id)
@@ -76,6 +138,7 @@ func (n *NotificationMySQL) GetByStudentProfilesID(id uint) ([]notification.Noti
 			&notification.CreatedAt,
 			&notification.TargetPath,
 			&notification.ReadStatus,
+			&notification.Data,
 		); err != nil {
 			return nil, err
 		}
@@ -91,7 +154,8 @@ func (n *NotificationMySQL) GetByUserOrStudentProfilesID(studentId uint, userId 
 			title,
 			contents,
 			target_path,
-			read_status
+			read_status,
+			data
 		FROM notification
 		WHERE student_profiles_id = ? OR user_id = ?
 	`, studentId, userId)
@@ -107,6 +171,7 @@ func (n *NotificationMySQL) GetByUserOrStudentProfilesID(studentId uint, userId 
 			&notification.Contents,
 			&notification.TargetPath,
 			&notification.ReadStatus,
+			&notification.Data,
 		); err != nil {
 			return nil, err
 		}
@@ -123,7 +188,7 @@ func init() {
 		Database: os.Getenv("DATABASE_DATABASE"),
 		Port:     os.Getenv("DATABASE_PORT"),
 	}
-	connectionString := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", creds.Username, creds.Password, creds.Host, creds.Port, creds.Database)
+	connectionString := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", creds.Username, creds.Password, creds.Host, creds.Port, creds.Database)
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		panic(err)

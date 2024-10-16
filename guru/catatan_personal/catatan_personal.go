@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/socketspace-jihad/tanya-backend/middlewares"
+	"github.com/socketspace-jihad/tanya-backend/models/notification"
 	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal"
 	"github.com/socketspace-jihad/tanya-backend/models/school_class_events_notes_personal_pictures"
 	"github.com/socketspace-jihad/tanya-backend/queue"
@@ -85,7 +86,7 @@ func (c *CatatanPersonal) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						defer file.Close()
 
 						// Tentukan path untuk menyimpan file
-						folderPath := fmt.Sprintf("./assets/images/class-events/%d", eventNotes.SchoolClassEventsData.ID)
+						folderPath := fmt.Sprintf("./assets/images/class-events-personal/%d", eventNotes.SchoolClassEventsData.ID)
 						filePath := fmt.Sprintf("%s/%s", folderPath, fileHeader.Filename)
 
 						// Buat folder jika belum ada
@@ -124,10 +125,17 @@ func (c *CatatanPersonal) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// Encode data untuk respons
 		json.NewEncoder(w).Encode(eventNotes)
 
+		notifData := notification.ParseDataStructToString(eventNotes)
 		// Publish event setelah berhasil
 		c.q.Publish(events.EventSiswaData{
 			Title:     fmt.Sprintf("Ada catatan kelas KHUSUS untuk SISWA Bapak/Ibu dari %v, Tekan notif ini untuk melihat", eventNotes.TeacherProfilesData.Name),
 			StudentID: eventNotes.StudentProfilesData.ID,
+			NotificationData: notification.NotificationData{
+				Title:      "Catatan Khusus dari Guru",
+				Contents:   "Ada catatan khusus dari guru",
+				TargetPath: &notification.CatatanPersonalTargetPath,
+				Data:       &notifData,
+			},
 		}, queue.TEventSiswa)
 	}
 }

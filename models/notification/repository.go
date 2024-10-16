@@ -5,4 +5,6 @@ type NotificationRepository interface {
 	GetByUserID(uint) ([]NotificationData, error)
 	GetByStudentProfilesID(uint) ([]NotificationData, error)
 	GetByUserOrStudentProfilesID(uint, uint) ([]NotificationData, error)
+	UpdateRead(*NotificationData) error
+	Save(*NotificationData) error
 }
