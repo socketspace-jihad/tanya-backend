@@ -74,6 +74,33 @@ func (u *UserTopicsMySQL) GetByUserID(id uint) ([]user_topics.UserTopicsData, er
 	return data, nil
 }
 
+func (u *UserTopicsMySQL) GetByTopicName(topic string) ([]user_topics.UserTopicsData, error) {
+	rows, err := u.DB.Query(`
+		SELECT 
+		id,
+		user_id,
+		topic
+		FROM user_topics
+		WHERE topic = ?
+	`, topic)
+	if err != nil {
+		return nil, err
+	}
+	var data []user_topics.UserTopicsData
+	for rows.Next() {
+		var userTopic user_topics.UserTopicsData
+		if err := rows.Scan(
+			&userTopic.ID,
+			&userTopic.UserData.ID,
+			&userTopic.Topic,
+		); err != nil {
+			return nil, err
+		}
+		data = append(data, userTopic)
+	}
+	return data, nil
+}
+
 func init() {
 	creds := &models.DBCreds{
 		Username: os.Getenv("DATABASE_USERNAME"),

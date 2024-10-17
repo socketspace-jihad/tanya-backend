@@ -21,4 +21,5 @@ type StudentPresensiData struct {
 	*school_class_events.SchoolClassEventsData `json:"school_class_events"`
 	*presensi_types.PresensitypesData          `json:"presensi_types"`
 	*teacher_profiles.TeacherProfilesData      `json:"teacher_profiles"`
+	Hadir                                      uint8 `json:"hadir"`
 }

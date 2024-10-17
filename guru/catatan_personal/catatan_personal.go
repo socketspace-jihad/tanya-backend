@@ -48,7 +48,7 @@ func (c *CatatanPersonal) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(notes)
 	case http.MethodPost:
 		// Set batas ukuran maksimal file upload (misalnya, 10MB)
-		const maxUploadSize = 10 << 20 // 10MB
+		const maxUploadSize = 20 << 20 // 20MB
 		r.ParseMultipartForm(maxUploadSize)
 
 		// Parsing JSON data dari form

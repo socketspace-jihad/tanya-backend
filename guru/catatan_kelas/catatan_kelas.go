@@ -30,7 +30,7 @@ func (p *CatatanKelas) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set batas ukuran maksimal file upload (misalnya, 10MB)
-	const maxUploadSize = 10 << 20 // 10MB
+	const maxUploadSize = 20 << 20 // 20MB
 	r.ParseMultipartForm(maxUploadSize)
 
 	// Parsing JSON data dari form

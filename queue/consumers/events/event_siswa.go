@@ -38,11 +38,13 @@ func EventSiswa(e engine.QueueEngine, consumer Consumer) {
 				log.Println(err)
 				return
 			}
+			topicName := fmt.Sprintf("%v.event-student-%v", consumer.Name, data.StudentID)
+			go createNotification(topicName, &data.NotificationData)
 			notifier := notifierFactory()
 			err = notifier.Notify(&notification.Notification{
 				Title:    data.Title,
 				Subtitle: data.Subtitle,
-				Topic:    fmt.Sprintf("%v.event-student-%v", consumer.Name, data.StudentID),
+				Topic:    topicName,
 			})
 			if err != nil {
 				log.Println(err)

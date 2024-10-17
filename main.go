@@ -53,6 +53,7 @@ import (
 	_ "github.com/socketspace-jihad/tanya-backend/parent/catatan_kelas"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/catatan_personal"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/kegiatan_siswa_parent"
+	_ "github.com/socketspace-jihad/tanya-backend/parent/kehadiran_siswa_parent"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/profile"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/registrasi_parent"
 	_ "github.com/socketspace-jihad/tanya-backend/parent/schedule_parent"

@@ -4,6 +4,8 @@ import "encoding/json"
 
 var (
 	CatatanPersonalTargetPath string = "/catatan-personal"
+	CatatanKelasTargetPath    string = "/catatan-kelas"
+	PresensiSiswaTargetPath   string = "/presensi-siswa"
 )
 
 func ParseDataStructToString(data interface{}) string {

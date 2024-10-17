@@ -20,7 +20,6 @@ func (n *NotificationMySQL) GetByID(id uint) (*notification.NotificationData, er
 }
 
 func (n *NotificationMySQL) Save(data *notification.NotificationData) error {
-	log.Println("SAVING", data)
 	tx, err := n.db.Begin()
 	if err != nil {
 		tx.Rollback()

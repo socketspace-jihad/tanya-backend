@@ -18,7 +18,7 @@ type TeacherProfilesData struct {
 	JoinedAt                       time.Time `json:"joined_at"`
 	CreatedAt                      time.Time `json:"created_at"`
 	verified_status.VerifiedStatus `json:"verified_status"`
-	NUPTK                          string `json:"nuptk"`
-	Contact                        string `json:"contact"`
-	Address                        string `json:"address"`
+	NUPTK                          string  `json:"nuptk"`
+	Contact                        *string `json:"contact"`
+	Address                        string  `json:"address"`
 }

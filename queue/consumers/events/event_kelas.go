@@ -38,11 +38,13 @@ func EventKelas(e engine.QueueEngine, consumer Consumer) {
 				log.Println(err)
 				return
 			}
+			topicName := fmt.Sprintf("%v.event-kelas-%v", consumer.Name, data.ClassID)
+			go createNotification(topicName, &data.NotificationData)
 			notifier := notifierFactory()
 			err = notifier.Notify(&notification.Notification{
 				Title:    data.Title,
 				Subtitle: data.Subtitle,
-				Topic:    fmt.Sprintf("%v.event-kelas-%v", consumer.Name, data.ClassID),
+				Topic:    topicName,
 			})
 			if err != nil {
 				log.Println(err)

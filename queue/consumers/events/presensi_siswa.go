@@ -29,11 +29,12 @@ func PresensiSiswaEvent(e engine.QueueEngine, consumer Consumer) {
 				log.Println(err)
 				return
 			}
+			topicName := fmt.Sprintf("%v.presensi-student-%v", consumer.Name, data.StudentID)
+			go createNotification(topicName, &data.NotificationData)
 			notifier := notifierFactory()
-			fmt.Println(fmt.Sprintf("%v.presensi-student-%v", consumer.Name, data.StudentID))
 			err = notifier.Notify(&notification.Notification{
 				Title: data.Message,
-				Topic: fmt.Sprintf("%v.presensi-student-%v", consumer.Name, data.StudentID),
+				Topic: topicName,
 			})
 			if err != nil {
 				log.Println(err)

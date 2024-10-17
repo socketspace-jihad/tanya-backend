@@ -3,6 +3,7 @@ package student_presensi_mysql
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/socketspace-jihad/tanya-backend/models/student_presensi"
 	"github.com/socketspace-jihad/tanya-backend/models/student_profiles"
 	"github.com/socketspace-jihad/tanya-backend/models/subjects"
+	"github.com/socketspace-jihad/tanya-backend/models/teacher_profiles"
 )
 
 type StudentPresensiMySQL struct {
@@ -24,7 +26,7 @@ func (s *StudentPresensiMySQL) Save(data *student_presensi.StudentPresensiData) 
 	if err != nil {
 		return tx.Rollback()
 	}
-	if _, err := tx.Query(`
+	res, err := tx.Exec(`
 			INSERT IGNORE INTO student_presensi (
 				student_profiles_id,
 				events_id,
@@ -32,9 +34,11 @@ func (s *StudentPresensiMySQL) Save(data *student_presensi.StudentPresensiData) 
 				lattitude,
 				longitude,
 				class_events_id,
-				teacher_profiles_id
+				teacher_profiles_id,
+				hadir,
+				presensi_types_id
 			) VALUES (
-				?,?,?,?,?,?,?
+				?,?,?,?,?,?,?,?,?
 			)
 		`,
 		data.StudentProfilesData.ID,
@@ -44,11 +48,23 @@ func (s *StudentPresensiMySQL) Save(data *student_presensi.StudentPresensiData) 
 		data.Longitude,
 		data.SchoolClassEventsData.ID,
 		data.TeacherProfilesData.ID,
-	); err != nil {
+		data.Hadir,
+		data.PresensitypesData.ID,
+	)
+	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	return tx.Commit()
+	affected, err := res.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	if affected == 0 {
+		return errors.New("not rows affected")
+	}
+	return nil
 }
 
 func (s *StudentPresensiMySQL) GetByID(id uint) (*student_presensi.StudentPresensiData, error) {
@@ -67,13 +83,14 @@ func (s *StudentPresensiMySQL) GetBySchoolClassEventsID(id uint) ([]student_pres
 			sp.presensi_types_id,
 			pt.name,
 			pt.deskripsi,
-			spr.name
+			spr.name,
+			sp.hadir
 		FROM
 			student_presensi AS sp
 		LEFT JOIN presensi_types AS pt
 			ON pt.id = sp.presensi_types_id
 		LEFT JOIN class_events AS ce
-			ON ce.id = sp.events_id AND sp.event_types_id = 3
+			ON ce.id = sp.class_events_id
 		LEFT JOIN subjects AS s
 			ON s.id = ce.subjects_id
 		LEFT JOIN student_profiles AS spr
@@ -103,6 +120,7 @@ func (s *StudentPresensiMySQL) GetBySchoolClassEventsID(id uint) ([]student_pres
 			&presensi.PresensitypesData.Name,
 			&presensi.PresensitypesData.Deskripsi,
 			&presensi.StudentProfilesData.Name,
+			&presensi.Hadir,
 		); err != nil {
 			return nil, err
 		}
@@ -122,16 +140,28 @@ func (s *StudentPresensiMySQL) GetByStudentProfilesID(id uint) ([]student_presen
 			sp.longitude,
 			sp.presensi_types_id,
 			pt.name,
-			pt.deskripsi
+			pt.deskripsi,
+			spr.name,
+			sp.hadir,
+			ce.start_date,
+			ce.end_date,
+			tp.id,
+			tp.name,
+			tp.contact
 		FROM
 			student_presensi AS sp
 		LEFT JOIN presensi_types AS pt
 			ON pt.id = sp.presensi_types_id
 		LEFT JOIN class_events AS ce
-			ON ce.id = sp.events_id AND sp.event_types_id = 3
+			ON ce.id = sp.class_events_id
 		LEFT JOIN subjects AS s
 			ON s.id = ce.subjects_id
+		LEFT JOIN student_profiles AS spr
+			ON spr.id = sp.student_profiles_id
+		LEFT JOIN teacher_profiles AS tp
+			ON sp.teacher_profiles_id = tp.id
 		WHERE sp.student_profiles_id = ?
+		ORDER BY sp.created_at DESC
 	`, id)
 	if err != nil {
 		return nil, err
@@ -143,6 +173,8 @@ func (s *StudentPresensiMySQL) GetByStudentProfilesID(id uint) ([]student_presen
 			SchoolClassEventsData: &school_class_events.SchoolClassEventsData{
 				SubjectsData: &subjects.SubjectsData{},
 			},
+			StudentProfilesData: &student_profiles.StudentProfilesData{},
+			TeacherProfilesData: &teacher_profiles.TeacherProfilesData{},
 		}
 		if err := rows.Scan(
 			&presensi.ID,
@@ -154,6 +186,13 @@ func (s *StudentPresensiMySQL) GetByStudentProfilesID(id uint) ([]student_presen
 			&presensi.PresensitypesData.ID,
 			&presensi.PresensitypesData.Name,
 			&presensi.PresensitypesData.Deskripsi,
+			&presensi.StudentProfilesData.Name,
+			&presensi.Hadir,
+			&presensi.SchoolClassEventsData.StartDate,
+			&presensi.SchoolClassEventsData.EndDate,
+			&presensi.TeacherProfilesData.ID,
+			&presensi.TeacherProfilesData.Name,
+			&presensi.TeacherProfilesData.Contact,
 		); err != nil {
 			return nil, err
 		}
