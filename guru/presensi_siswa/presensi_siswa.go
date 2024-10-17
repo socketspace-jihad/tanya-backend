@@ -56,6 +56,9 @@ func (p *PresensiSiswaV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					SchoolClassEventsData: &p.SchoolClassEventsData,
 					EventTypesData:        *event_types.ClassEvents,
 					TeacherProfilesData:   g,
+					PresensitypesData: &presensi_types.PresensitypesData{
+						ID: 4,
+					},
 				}
 				err := student_presensi.StudentPresensiDB.Save(presensi)
 				if err == nil {
