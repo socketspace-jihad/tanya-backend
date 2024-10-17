@@ -62,7 +62,7 @@ func (p *PresensiSiswa) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 				p.q.Publish(events.EventSiswaData{
 					StudentID: profile.ID,
-					Title:     fmt.Sprintf("%v Tercatat Hadir di Kegiatan %v", profile.FirstName, g.FirstName),
+					Title:     fmt.Sprintf("%v Tercatat Hadir di Kegiatan %v", profile.FirstName, g.FirstName.String),
 				}, queue.TEventSiswa)
 			}(profile)
 		}

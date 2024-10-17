@@ -8,6 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/socketspace-jihad/tanya-backend/models"
 	"github.com/socketspace-jihad/tanya-backend/models/parent_profiles"
+	"github.com/socketspace-jihad/tanya-backend/models/user"
+	"github.com/socketspace-jihad/tanya-backend/models/user_roles"
 )
 
 type ParentProfilesMySQL struct {
@@ -15,7 +17,39 @@ type ParentProfilesMySQL struct {
 }
 
 func (p *ParentProfilesMySQL) GetByID(id uint) (*parent_profiles.ParentProfilesData, error) {
-	return nil, nil
+	rows, err := p.db.Query(`
+		SELECT
+			pp.id,
+			pp.name,
+			u.first_name,
+			u.email
+		FROM
+			parent_profiles AS pp
+		LEFT JOIN user_roles AS ur
+			ON ur.id = pp.user_roles_id
+		LEFT JOIN user AS u
+			ON u.id = ur.user_id
+		WHERE pp.id = ?
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	data := parent_profiles.ParentProfilesData{
+		UserRolesData: user_roles.UserRolesData{
+			UserData: user.UserData{},
+		},
+	}
+	for rows.Next() {
+		if err := rows.Scan(
+			&data.ID,
+			&data.Name,
+			&data.UserRolesData.UserData.FirstName,
+			&data.UserRolesData.UserData.Email,
+		); err != nil {
+			return nil, err
+		}
+	}
+	return &data, nil
 }
 
 func (p *ParentProfilesMySQL) Save(data *parent_profiles.ParentProfilesData) error {
